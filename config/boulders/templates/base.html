@@ -1,10 +1,160 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Sel Blocs{% endblock %}</title>
+    <style>
+        :root {
+            --color-bg: #f5f5f4;
+            --color-surface: #ffffff;
+            --color-text: #1c1917;
+            --color-muted: #78716c;
+            --color-border: #e7e5e4;
+            --color-primary: #16a34a;
+            --color-primary-dark: #15803d;
+            --color-off: #a8a29e;
+            --radius: 8px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.5;
+        }
+
+        header {
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header a {
+            color: var(--color-text);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        header nav a {
+            color: var(--color-muted);
+            font-weight: 400;
+            margin-left: 1rem;
+        }
+
+        header nav a:hover {
+            color: var(--color-text);
+        }
+
+        main {
+            max-width: 640px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        ul.bloc-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .bloc-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+        }
+
+        .bloc-info .grade {
+            color: var(--color-muted);
+            font-size: 0.9rem;
+        }
+
+        button, .btn {
+            font: inherit;
+            border: none;
+            border-radius: var(--radius);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            color: #fff;
+            background: var(--color-off);
+        }
+
+        button.toppe {
+            background: var(--color-primary);
+        }
+
+        button:hover {
+            filter: brightness(1.05);
+        }
+
+        form { margin: 0; }
+
+        form.form-page {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        form.form-page p { margin: 0; }
+
+        form.form-page input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius);
+            font: inherit;
+        }
+
+        form.form-page label {
+            font-size: 0.9rem;
+            color: var(--color-muted);
+        }
+
+        .error {
+            color: #b91c1c;
+        }
+    </style>
 </head>
 <body>
-    {% block content %}{% endblock %}
+    <header>
+        <a href="{% url 'liste_blocs' %}">Sel Blocs</a>
+        {% if user.is_authenticated %}
+        <nav>
+            <span>{{ user.get_username }}</span>
+            <form method="post" action="{% url 'logout' %}" style="display:inline">
+                {% csrf_token %}
+                <a href="#" onclick="this.closest('form').submit(); return false;">Déconnexion</a>
+            </form>
+        </nav>
+        {% endif %}
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 </body>
 </html>

@@ -18,13 +18,30 @@ class User(AbstractUser):
         ("H", "Homme"),
         ("F", "Femme"),
     ]
+    NIVEAU_CHOICES = [
+        ("J", "Jaune"),
+        ("V", "Vert"),
+        ("B", "Bleu"),
+        ("R", "Rouge"),
+        ("N", "Noir"),
+        ("I", "Violet"),
+    ]
+    ANNEE_CHOICES = [
+        ("1A", "1ère année"),
+        ("2A", "2ème année"),
+        ("3A", "3ème année"),
+        ("B", "Bachelor"),
+        ("A", "Alternant"),
+        ("Autre", "Autre"),
+    ]
 
     # Nom -> last_name, Prenom -> first_name : deja herites d'AbstractUser, pas besoin de les redefinir
 
     email = models.EmailField(unique=True)  # unique pour eviter les doublons lors de l'import Excel
     date_naissance = models.DateField(null=True, blank=True)
     sexe = models.CharField(max_length=1, choices=SEXE_CHOICES, blank=True)
-    niveau = models.CharField(max_length=20, blank=True)  # cotation arkose
+    niveau = models.CharField(max_length=20, choices=NIVEAU_CHOICES, blank=True)  # cotation arkose
+    annee = models.CharField(max_length=5, choices=ANNEE_CHOICES, blank=True)
 
     dispo_lundi = models.BooleanField(default=False)
     dispo_mardi = models.BooleanField(default=False)

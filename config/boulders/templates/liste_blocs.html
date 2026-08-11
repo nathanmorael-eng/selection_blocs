@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Mes blocs{% endblock %}
+
+{% block content %}
+<h1>Liste des blocs</h1>
+<ul class="bloc-list">
+    {% for bloc in blocs %}
+        <li class="bloc-item">
+            <div class="bloc-info">
+                {{ bloc.name }} <span class="grade">({{ bloc.grade }})</span>
+            </div>
+            <form method="post" action="{% url 'toggle_ascent' bloc.id %}">
+                {% csrf_token %}
+                <button type="submit" class="{% if bloc.toppe %}toppe{% endif %}">
+                    {% if bloc.toppe %}Toppé{% else %}Pas toppé{% endif %}
+                </button>
+            </form>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
