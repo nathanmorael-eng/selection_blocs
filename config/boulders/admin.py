@@ -33,7 +33,8 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Boulder)
 class BoulderAdmin(admin.ModelAdmin):
-    list_display = ('name', 'grade', 'location')
+    list_display = ('numero', 'name', 'location')
+    ordering = ('numero',)
     search_fields = ('name', 'location')
 
 

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Gérer les blocs{% endblock %}
+
+{% block content %}
+<h1>Ajouter un bloc</h1>
+<div class="card">
+    <form method="post" class="form-page">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Ajouter</button>
+    </form>
+</div>
+
+<h1>Blocs existants</h1>
+<div class="card">
+    <ul class="bloc-list">
+        {% for bloc in blocs %}
+        <li class="bloc-item">
+            <div class="bloc-info">
+                <span class="numero">#{{ bloc.numero }}</span>
+                {{ bloc.name }}
+                {% if bloc.location %} — {{ bloc.location }}{% endif %}
+            </div>
+            <form method="post" action="{% url 'supprimer_bloc' bloc.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-refuse">Supprimer</button>
+            </form>
+        </li>
+        {% empty %}
+        <li class="bloc-item">Aucun bloc pour l'instant</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

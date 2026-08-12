@@ -4,19 +4,76 @@
 
 {% block content %}
 <h1>Liste des blocs</h1>
-<ul class="bloc-list">
+
+{% if nb_total %}
+<div class="progress-summary">
+    <p id="progression-texte">{{ nb_toppes }} / {{ nb_total }} blocs toppés</p>
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progression-barre" style="width: {% widthratio nb_toppes nb_total 100 %}%;"></div>
+    </div>
+</div>
+{% endif %}
+
+<div class="bloc-grid">
     {% for bloc in blocs %}
-        <li class="bloc-item">
-            <div class="bloc-info">
-                {{ bloc.name }} <span class="grade">({{ bloc.grade }})</span>
-            </div>
+        <div class="bloc-card {% if bloc.toppe %}is-toppe{% endif %}">
+            <span class="numero">#{{ bloc.numero }}</span>
+            <h3>{{ bloc.name }}</h3>
+            {% if bloc.location %}<p class="location">Lieu : {{ bloc.location }}</p>{% endif %}
             <form method="post" action="{% url 'toggle_ascent' bloc.id %}">
                 {% csrf_token %}
                 <button type="submit" class="{% if bloc.toppe %}toppe{% endif %}">
                     {% if bloc.toppe %}Toppé{% else %}Pas toppé{% endif %}
                 </button>
             </form>
-        </li>
+        </div>
+    {% empty %}
+        <p>Aucun bloc pour l'instant. Reviens bientôt !</p>
     {% endfor %}
-</ul>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function mettreAJourProgression() {
+            var cartes = document.querySelectorAll('.bloc-card');
+            var toppes = document.querySelectorAll('.bloc-card.is-toppe');
+            var texte = document.getElementById('progression-texte');
+            var barre = document.getElementById('progression-barre');
+            if (texte) {
+                texte.textContent = toppes.length + ' / ' + cartes.length + ' blocs toppés';
+            }
+            if (barre && cartes.length) {
+                barre.style.width = (toppes.length / cartes.length * 100) + '%';
+            }
+        }
+
+        document.querySelectorAll('.bloc-card form').forEach(function (form) {
+            form.addEventListener('submit', function (evenement) {
+                evenement.preventDefault();
+                var donnees = new FormData(form);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: donnees,
+                    headers: {'X-Requested-With': 'XMLHttpRequest'},
+                }).then(function (reponse) {
+                    if (!reponse.ok) {
+                        throw new Error('la requête a échoué');
+                    }
+                    var carte = form.closest('.bloc-card');
+                    var bouton = form.querySelector('button');
+                    var estToppe = carte.classList.toggle('is-toppe');
+                    bouton.classList.toggle('toppe', estToppe);
+                    bouton.textContent = estToppe ? 'Toppé' : 'Pas toppé';
+                    mettreAJourProgression();
+                }).catch(function () {
+                    // en cas de souci reseau, on retombe sur un envoi de formulaire classique
+                    form.submit();
+                });
+            });
+        });
+    });
+</script>
 {% endblock %}

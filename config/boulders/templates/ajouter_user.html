@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Ajouter un utilisateur{% endblock %}
+
+{% block content %}
+<h1>Ajouter un utilisateur</h1>
+<div class="card">
+    <p>Le nom d'utilisateur et le mot de passe (date de naissance, format JJMMAAAA) sont générés automatiquement.</p>
+    <form method="post" class="form-page">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Ajouter</button>
+    </form>
+</div>
+{% endblock %}

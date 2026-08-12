@@ -4,9 +4,10 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import ImportExcelForm
+from .forms import AjouterUserForm, BoulderForm, ImportExcelForm
 from .imports import FichierIllisible, importer_excel
 from .models import Boulder, Ascent, User
+from .utils import generer_username, mot_de_passe_initial
 from .vcards import generer_vcf
 
 # whitelist des colonnes triables : on ne fait jamais confiance a une valeur
@@ -26,14 +27,18 @@ def organisateur_required(view_func):
 
 @login_required
 def liste_blocs(request):
-    blocs = Boulder.objects.all()
+    blocs = list(Boulder.objects.order_by("numero"))
     ids_toppes = set(
         Ascent.objects.filter(user=request.user).values_list("boulder_id", flat=True)
     )
     for bloc in blocs:
         bloc.toppe = bloc.id in ids_toppes  # on attache l'info directement a l'objet
 
-    return render(request, "liste_blocs.html", {"blocs": blocs})
+    return render(request, "liste_blocs.html", {
+        "blocs": blocs,
+        "nb_total": len(blocs),
+        "nb_toppes": sum(1 for b in blocs if b.toppe),
+    })
 
 
 @login_required
@@ -54,10 +59,11 @@ def liste_users(request):
     champ = tri.lstrip("-")
     if champ not in SORT_FIELDS:
         tri = "username"
+    q = request.GET.get("q", "").strip()
 
-    # une seule requete pour tout le monde, puis on repartit par groupe en
-    # memoire (meme principe que pour ids_toppes dans liste_blocs : on evite
-    # de refaire une requete SQL par groupe)
+    # une seule requete pour tout le monde, puis on repartit par groupe et on
+    # filtre par recherche en memoire (meme principe que pour ids_toppes dans
+    # liste_blocs : on evite de refaire une requete SQL par groupe/recherche)
     users = list(User.objects.annotate(nb_blocs=Count("ascents")).order_by(tri))
     # tri Python stable : garde l'ordre ci-dessus, mais fait passer les
     # personnes deja affectees a la fin de la liste
@@ -68,15 +74,54 @@ def liste_users(request):
         if u.groupe in par_groupe:
             par_groupe[u.groupe].append(u)
 
+    if q:
+        q_lower = q.lower()
+        users_affiches = [
+            u for u in users
+            if q_lower in u.username.lower()
+            or q_lower in u.first_name.lower()
+            or q_lower in u.last_name.lower()
+            or q_lower in u.email.lower()
+        ]
+    else:
+        users_affiches = users
+
     return render(request, "liste_users.html", {
-        "users": users,
+        "users": users_affiches,
         "tri_actuel": tri,
+        "q": q,
         "affectes_compet": par_groupe["compet"],
         "affectes_perf": par_groupe["perf"],
         "affectes_refuse": par_groupe["refuse"],
         "nb_compet": len(par_groupe["compet"]),
         "nb_perf": len(par_groupe["perf"]),
     })
+
+
+@organisateur_required
+def supprimer_user(request, user_id):
+    if request.method != "POST":
+        return redirect("liste_users")
+
+    if user_id == request.user.id:
+        messages.error(request, "Tu ne peux pas te supprimer toi-même.")
+        return redirect("liste_users")
+
+    candidat = get_object_or_404(User, id=user_id)
+    messages.success(request, f"{candidat.first_name} {candidat.last_name} supprimé(e).")
+    candidat.delete()
+    return redirect("liste_users")
+
+
+@organisateur_required
+def supprimer_tous_non_organisateurs(request):
+    if request.method != "POST":
+        return redirect("liste_users")
+
+    nb = User.objects.filter(is_organisateur=False).count()
+    User.objects.filter(is_organisateur=False).delete()
+    messages.success(request, f"{nb} utilisateur(s) non-organisateur(s) supprimé(s).")
+    return redirect("liste_users")
 
 
 @organisateur_required
@@ -136,4 +181,50 @@ def contacts_vcf(request):
     response = HttpResponse(contenu, content_type="text/vcard")
     response["Content-Disposition"] = 'attachment; filename="contacts_compet_perf.vcf"'
     return response
+
+
+@organisateur_required
+def ajouter_user(request):
+    if request.method == "POST":
+        form = AjouterUserForm(request.POST)
+        if form.is_valid():
+            candidat = form.save(commit=False)
+            candidat.username = generer_username(candidat.first_name, candidat.last_name)
+            if candidat.date_naissance:
+                candidat.set_password(mot_de_passe_initial(candidat.date_naissance))
+            else:
+                candidat.set_unusable_password()
+            candidat.save()
+            messages.success(request, f"{candidat.first_name} {candidat.last_name} ajouté(e) (identifiant : {candidat.username}).")
+            return redirect("liste_users")
+    else:
+        form = AjouterUserForm()
+
+    return render(request, "ajouter_user.html", {"form": form})
+
+
+@organisateur_required
+def gerer_blocs(request):
+    if request.method == "POST":
+        form = BoulderForm(request.POST)
+        if form.is_valid():
+            bloc = form.save()
+            messages.success(request, f"Bloc « {bloc.name} » ajouté.")
+            return redirect("gerer_blocs")
+    else:
+        form = BoulderForm()
+
+    blocs = Boulder.objects.all().order_by("numero")
+    return render(request, "gerer_blocs.html", {"form": form, "blocs": blocs})
+
+
+@organisateur_required
+def supprimer_bloc(request, boulder_id):
+    if request.method != "POST":
+        return redirect("gerer_blocs")
+
+    bloc = get_object_or_404(Boulder, id=boulder_id)
+    bloc.delete()
+    messages.success(request, f"Bloc « {bloc.name} » supprimé.")
+    return redirect("gerer_blocs")
 

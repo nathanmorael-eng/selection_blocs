@@ -8,50 +8,65 @@
     <span class="badge badge-compet">{{ nb_compet }} en compétition</span>
     <span class="badge badge-perf">{{ nb_perf }} en perf</span>
 </div>
+
+<div class="toolbar">
+    <form method="get" class="search-form">
+        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher (nom, email, identifiant)...">
+        <button type="submit">Rechercher</button>
+        {% if q %}<a href="{% url 'liste_users' %}" class="btn">Effacer</a>{% endif %}
+    </form>
+    <form method="post" action="{% url 'supprimer_tous_non_organisateurs' %}"
+          onsubmit="return confirm('Supprimer TOUS les utilisateurs non-organisateurs ? Cette action est irréversible.');">
+        {% csrf_token %}
+        <button type="submit" class="btn-refuse">Supprimer tous les non-organisateurs</button>
+    </form>
+</div>
+
 <table>
     <thead>
         <tr>
             <th>
                 {% if tri_actuel == "username" %}
-                    <a href="?tri=-username">Nom d'utilisateur ▲</a>
+                    <a href="?tri=-username&q={{ q|urlencode }}">Nom d'utilisateur ▲</a>
                 {% elif tri_actuel == "-username" %}
-                    <a href="?tri=username">Nom d'utilisateur ▼</a>
+                    <a href="?tri=username&q={{ q|urlencode }}">Nom d'utilisateur ▼</a>
                 {% else %}
-                    <a href="?tri=username">Nom d'utilisateur</a>
+                    <a href="?tri=username&q={{ q|urlencode }}">Nom d'utilisateur</a>
                 {% endif %}
             </th>
             <th>Prénom</th>
             <th>Nom</th>
             <th>
                 {% if tri_actuel == "niveau" %}
-                    <a href="?tri=-niveau">Niveau ▲</a>
+                    <a href="?tri=-niveau&q={{ q|urlencode }}">Niveau ▲</a>
                 {% elif tri_actuel == "-niveau" %}
-                    <a href="?tri=niveau">Niveau ▼</a>
+                    <a href="?tri=niveau&q={{ q|urlencode }}">Niveau ▼</a>
                 {% else %}
-                    <a href="?tri=niveau">Niveau</a>
+                    <a href="?tri=niveau&q={{ q|urlencode }}">Niveau</a>
                 {% endif %}
             </th>
             <th>
                 {% if tri_actuel == "annee" %}
-                    <a href="?tri=-annee">Étude ▲</a>
+                    <a href="?tri=-annee&q={{ q|urlencode }}">Étude ▲</a>
                 {% elif tri_actuel == "-annee" %}
-                    <a href="?tri=annee">Étude ▼</a>
+                    <a href="?tri=annee&q={{ q|urlencode }}">Étude ▼</a>
                 {% else %}
-                    <a href="?tri=annee">Étude</a>
+                    <a href="?tri=annee&q={{ q|urlencode }}">Étude</a>
                 {% endif %}
             </th>
             <th>
                 {% if tri_actuel == "nb_blocs" %}
-                    <a href="?tri=-nb_blocs">Blocs toppés ▲</a>
+                    <a href="?tri=-nb_blocs&q={{ q|urlencode }}">Blocs toppés ▲</a>
                 {% elif tri_actuel == "-nb_blocs" %}
-                    <a href="?tri=nb_blocs">Blocs toppés ▼</a>
+                    <a href="?tri=nb_blocs&q={{ q|urlencode }}">Blocs toppés ▼</a>
                 {% else %}
-                    <a href="?tri=nb_blocs">Blocs toppés</a>
+                    <a href="?tri=nb_blocs&q={{ q|urlencode }}">Blocs toppés</a>
                 {% endif %}
             </th>
             <th>Dispo compét</th>
             <th>Dispo perf</th>
             <th>Réponse</th>
+            <th>Supprimer</th>
         </tr>
     </thead>
     <tbody>
@@ -93,6 +108,13 @@
                         </form>
                     </div>
                 {% endif %}
+            </td>
+            <td>
+                <form method="post" action="{% url 'supprimer_user' u.id %}"
+                      onsubmit="return confirm('Supprimer {{ u.first_name }} {{ u.last_name }} ?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-refuse">Supprimer</button>
+                </form>
             </td>
         </tr>
         {% endfor %}

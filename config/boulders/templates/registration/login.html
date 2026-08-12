@@ -3,17 +3,56 @@
 {% block title %}Connexion{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h1>Connexion</h1>
+<div class="login-page">
+    <div class="login-header">
+        <h1 class="login-title">Sélection Blocs</h1>
+    </div>
 
-    {% if form.errors %}
-    <p class="error">Identifiant ou mot de passe incorrect.</p>
-    {% endif %}
+    <div class="card login-card">
+        <h2>Connexion</h2>
 
-    <form method="post" class="form-page">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Se connecter</button>
-    </form>
+        {% if form.errors %}
+        <p class="error">Identifiant ou mot de passe incorrect.</p>
+        {% endif %}
+
+        <form method="post" class="form-page">
+            {% csrf_token %}
+            <div>
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+            <div>
+                {{ form.password.label_tag }}
+                <div class="password-input-wrapper">
+                    {{ form.password }}
+                    <button type="button" id="toggle-password" class="btn-toggle-password">Afficher</button>
+                </div>
+                {{ form.password.errors }}
+            </div>
+            <button type="submit">Se connecter</button>
+        </form>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var champIdentifiant = document.getElementById('id_username');
+        if (champIdentifiant) {
+            champIdentifiant.focus();
+        }
+
+        var boutonBascule = document.getElementById('toggle-password');
+        var champMotDePasse = document.getElementById('id_password');
+        if (boutonBascule && champMotDePasse) {
+            boutonBascule.addEventListener('click', function () {
+                var estMasque = champMotDePasse.type === 'password';
+                champMotDePasse.type = estMasque ? 'text' : 'password';
+                boutonBascule.textContent = estMasque ? 'Masquer' : 'Afficher';
+            });
+        }
+    });
+</script>
 {% endblock %}

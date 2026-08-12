@@ -1,5 +1,4 @@
 import datetime as dt
-import unicodedata
 import zipfile
 
 import openpyxl
@@ -8,7 +7,7 @@ from django.core.validators import validate_email
 from openpyxl.utils.exceptions import InvalidFileException
 
 from .models import User
-from .utils import mot_de_passe_initial
+from .utils import generer_username, mot_de_passe_initial, normaliser_telephone
 
 # ordre attendu des colonnes dans le fichier Excel (a partir de la ligne 2)
 NB_COLONNES = 12
@@ -29,26 +28,6 @@ def _resoudre_choice(valeur, choices):
         return texte
     labels = {label.strip().lower(): code for code, label in choices}
     return labels.get(texte.lower())
-
-
-def _generer_username(prenom, nom):
-    base = unicodedata.normalize("NFKD", f"{prenom}.{nom}").encode("ascii", "ignore").decode().lower()
-    base = "".join(c for c in base if c.isalnum() or c == ".") or "membre"
-    username = base
-    i = 1
-    while User.objects.filter(username=username).exists():
-        i += 1
-        username = f"{base}{i}"
-    return username
-
-
-def _normaliser_telephone(valeur):
-    # le fichier stocke le numero SANS le "+" (voir l'entete de colonne) ;
-    # on le reconstruit ici, au moment de la creation, une fois pour toutes
-    texte = str(valeur).strip()
-    if not texte:
-        return ""
-    return texte if texte.startswith("+") else f"+{texte}"
 
 
 def _parser_date(valeur):
@@ -123,11 +102,11 @@ def importer_excel(fichier):
                 continue
 
         candidat = User(
-            username=_generer_username(prenom or "", nom or ""),
+            username=generer_username(prenom or "", nom or ""),
             email=email,
             first_name=(prenom or "").strip(),
             last_name=(nom or "").strip(),
-            telephone=_normaliser_telephone(telephone) if telephone else "",
+            telephone=normaliser_telephone(telephone) if telephone else "",
             annee=annee_code,
             sexe=sexe_code,
             niveau=niveau_code,
