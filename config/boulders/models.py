@@ -17,6 +17,7 @@ class User(AbstractUser):
     SEXE_CHOICES = [
         ("H", "Homme"),
         ("F", "Femme"),
+        ("A", "Autre"),
     ]
     NIVEAU_CHOICES = [
         ("J", "Jaune"),
@@ -34,6 +35,11 @@ class User(AbstractUser):
         ("A", "Alternant"),
         ("Autre", "Autre"),
     ]
+    GROUPE_CHOICES = [
+        ("compet", "Compétition"),
+        ("perf", "Perf"),
+        ("refuse", "Refusé"),
+    ]
 
     # Nom -> last_name, Prenom -> first_name : deja herites d'AbstractUser, pas besoin de les redefinir
 
@@ -42,11 +48,18 @@ class User(AbstractUser):
     sexe = models.CharField(max_length=1, choices=SEXE_CHOICES, blank=True)
     niveau = models.CharField(max_length=20, choices=NIVEAU_CHOICES, blank=True)  # cotation arkose
     annee = models.CharField(max_length=5, choices=ANNEE_CHOICES, blank=True)
+    telephone = models.CharField(max_length=20, blank=True)
+    groupe = models.CharField(max_length=10, choices=GROUPE_CHOICES, blank=True)
 
     dispo_lundi = models.BooleanField(default=False)
     dispo_mardi = models.BooleanField(default=False)
     dispo_creneaux_compet = models.BooleanField(default=False)
     dispo_creneaux_perf = models.BooleanField(default=False)
+
+    is_organisateur = models.BooleanField(default=False)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

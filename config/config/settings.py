@@ -122,3 +122,9 @@ AUTH_USER_MODEL = "boulders.User"
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'liste_blocs'
 LOGOUT_REDIRECT_URL = 'login'
+
+# En dev : les emails s'affichent dans le terminal au lieu d'etre reellement envoyes.
+# Pour un vrai envoi, il faudra remplacer par le backend SMTP et renseigner
+# EMAIL_HOST / EMAIL_HOST_USER / EMAIL_HOST_PASSWORD (a faire plus tard).
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'AS Escalade <no-reply@as-escalade.local>'

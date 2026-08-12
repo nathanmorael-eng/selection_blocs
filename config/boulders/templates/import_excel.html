@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Importer un fichier Excel{% endblock %}
+
+{% block content %}
+<h1>Importer des candidats depuis un fichier Excel</h1>
+<div class="card">
+    <p>
+        Colonnes attendues, dans cet ordre : Nom, Prénom, Mail, Téléphone, Cursus, Sexe,
+        Date de naissance, Niveau, Dispo lundi, Dispo mardi, Dispo créneaux compét, Dispo créneaux perf.
+    </p>
+    <form method="post" enctype="multipart/form-data" class="form-page">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Importer</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Cartes de contact</h2>
+    <p>Génère un fichier .vcf avec un contact par personne des groupes Compét et Perf (nommés compet_1, compet_2, ... et perf_1, perf_2, ...), à importer dans ton téléphone ou ta messagerie.</p>
+    <a href="{% url 'contacts_vcf' %}" class="btn">Télécharger les cartes de contact</a>
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Utilisateurs{% endblock %}
+
+{% block content %}
+<h1>Liste des utilisateurs</h1>
+<div class="stats">
+    <span class="badge badge-compet">{{ nb_compet }} en compétition</span>
+    <span class="badge badge-perf">{{ nb_perf }} en perf</span>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>
+                {% if tri_actuel == "username" %}
+                    <a href="?tri=-username">Nom d'utilisateur ▲</a>
+                {% elif tri_actuel == "-username" %}
+                    <a href="?tri=username">Nom d'utilisateur ▼</a>
+                {% else %}
+                    <a href="?tri=username">Nom d'utilisateur</a>
+                {% endif %}
+            </th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>
+                {% if tri_actuel == "niveau" %}
+                    <a href="?tri=-niveau">Niveau ▲</a>
+                {% elif tri_actuel == "-niveau" %}
+                    <a href="?tri=niveau">Niveau ▼</a>
+                {% else %}
+                    <a href="?tri=niveau">Niveau</a>
+                {% endif %}
+            </th>
+            <th>
+                {% if tri_actuel == "annee" %}
+                    <a href="?tri=-annee">Étude ▲</a>
+                {% elif tri_actuel == "-annee" %}
+                    <a href="?tri=annee">Étude ▼</a>
+                {% else %}
+                    <a href="?tri=annee">Étude</a>
+                {% endif %}
+            </th>
+            <th>
+                {% if tri_actuel == "nb_blocs" %}
+                    <a href="?tri=-nb_blocs">Blocs toppés ▲</a>
+                {% elif tri_actuel == "-nb_blocs" %}
+                    <a href="?tri=nb_blocs">Blocs toppés ▼</a>
+                {% else %}
+                    <a href="?tri=nb_blocs">Blocs toppés</a>
+                {% endif %}
+            </th>
+            <th>Dispo compét</th>
+            <th>Dispo perf</th>
+            <th>Réponse</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in users %}
+        <tr>
+            <td>{{ u.username }}</td>
+            <td>{{ u.first_name }}</td>
+            <td>{{ u.last_name }}</td>
+            <td>{{ u.get_niveau_display }}</td>
+            <td>{{ u.get_annee_display }}</td>
+            <td>{{ u.nb_blocs }}</td>
+            <td>{% if u.dispo_creneaux_compet %}<span class="dispo-oui">Oui</span>{% else %}<span class="dispo-non">Non</span>{% endif %}</td>
+            <td>{% if u.dispo_creneaux_perf %}<span class="dispo-oui">Oui</span>{% else %}<span class="dispo-non">Non</span>{% endif %}</td>
+            <td>
+                {% if u.groupe %}
+                    <div class="actions">
+                        <span>{{ u.get_groupe_display }}</span>
+                        <form method="post" action="{% url 'retirer_affectation' u.id %}">
+                            {% csrf_token %}
+                            <button type="submit">Retirer l'affectation</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="actions">
+                        <form method="post" action="{% url 'affecter_groupe' u.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="groupe" value="compet">
+                            <button type="submit" class="btn-compet">Compét</button>
+                        </form>
+                        <form method="post" action="{% url 'affecter_groupe' u.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="groupe" value="perf">
+                            <button type="submit" class="btn-perf">Perf</button>
+                        </form>
+                        <form method="post" action="{% url 'affecter_groupe' u.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="groupe" value="refuse">
+                            <button type="submit" class="btn-refuse">Refuser</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h1>Affectations</h1>
+
+<div class="card">
+    <h2>Compétition</h2>
+    <ul class="bloc-list">
+        {% for u in affectes_compet %}
+        <li class="bloc-item">{{ u.first_name }} {{ u.last_name }} — {{ u.telephone|default:"pas de téléphone renseigné" }}</li>
+        {% empty %}
+        <li class="bloc-item">Personne pour l'instant</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="card">
+    <h2>Perf</h2>
+    <ul class="bloc-list">
+        {% for u in affectes_perf %}
+        <li class="bloc-item">{{ u.first_name }} {{ u.last_name }} — {{ u.telephone|default:"pas de téléphone renseigné" }}</li>
+        {% empty %}
+        <li class="bloc-item">Personne pour l'instant</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="card">
+    <h2>Refusés</h2>
+    <ul class="bloc-list">
+        {% for u in affectes_refuse %}
+        <li class="bloc-item">{{ u.first_name }} {{ u.last_name }} — {{ u.telephone|default:"pas de téléphone renseigné" }}</li>
+        {% empty %}
+        <li class="bloc-item">Personne pour l'instant</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
