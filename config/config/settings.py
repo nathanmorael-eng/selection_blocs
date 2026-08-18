@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 ALLOWED_HOSTS = ["BBlocs.pythonanywhere.com"]
-SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+SECRET_KEY = 'smW9LgScEzVFNKxmdF5-t_21TPKzH7CdPrqFkFJDCLVFFY8q61Ssxl_lepWPMfG_2T8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
