@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 
-ALLOWED_HOSTS = ["BBlocs.pythonanywhere.com"]
+ALLOWED_HOSTS = ["bblocs.pythonanywhere.com"]
 SECRET_KEY = 'smW9LgScEzVFNKxmdF5-t_21TPKzH7CdPrqFkFJDCLVFFY8q61Ssxl_lepWPMfG_2T8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
