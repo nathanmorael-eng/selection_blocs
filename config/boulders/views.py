@@ -14,6 +14,13 @@ from .vcards import generer_vcf
 # venue de l'URL pour construire un order_by() directement
 SORT_FIELDS = {"username", "nb_blocs", "niveau", "annee", "sexe"}
 
+# pour certains tris, on ajoute un critere secondaire (ex: a sexe egal, on
+# affiche d'abord ceux qui ont toppe le plus de blocs)
+SORT_SECONDAIRE = {
+    "sexe": ["sexe", "-nb_blocs"],
+    "-sexe": ["-sexe", "-nb_blocs"],
+}
+
 GROUPE_VALUES = {value for value, _ in User.GROUPE_CHOICES}
 
 
@@ -64,7 +71,8 @@ def liste_users(request):
     # une seule requete pour tout le monde, puis on repartit par groupe et on
     # filtre par recherche en memoire (meme principe que pour ids_toppes dans
     # liste_blocs : on evite de refaire une requete SQL par groupe/recherche)
-    users = list(User.objects.annotate(nb_blocs=Count("ascents")).order_by(tri))
+    ordre = SORT_SECONDAIRE.get(tri, [tri])
+    users = list(User.objects.annotate(nb_blocs=Count("ascents")).order_by(*ordre))
     # tri Python stable : garde l'ordre ci-dessus, mais fait passer les
     # personnes deja affectees a la fin de la liste
     users.sort(key=lambda u: bool(u.groupe))
