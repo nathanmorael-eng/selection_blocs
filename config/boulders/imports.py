@@ -7,7 +7,7 @@ from django.core.validators import validate_email
 from openpyxl.utils.exceptions import InvalidFileException
 
 from .models import User
-from .utils import generer_username, mot_de_passe_initial, normaliser_telephone
+from .utils import mot_de_passe_initial, normaliser_telephone
 
 # ordre attendu des colonnes dans le fichier Excel (a partir de la ligne 2)
 NB_COLONNES = 12
@@ -102,7 +102,7 @@ def importer_excel(fichier):
                 continue
 
         candidat = User(
-            username=generer_username(prenom or "", nom or ""),
+            username=email,
             email=email,
             first_name=(prenom or "").strip(),
             last_name=(nom or "").strip(),

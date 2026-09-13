@@ -7,12 +7,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AjouterUserForm, BoulderForm, ImportExcelForm
 from .imports import FichierIllisible, importer_excel
 from .models import Boulder, Ascent, User
-from .utils import generer_username, mot_de_passe_initial
+from .utils import mot_de_passe_initial
 from .vcards import generer_vcf
 
 # whitelist des colonnes triables : on ne fait jamais confiance a une valeur
 # venue de l'URL pour construire un order_by() directement
-SORT_FIELDS = {"username", "nb_blocs", "niveau", "annee"}
+SORT_FIELDS = {"username", "nb_blocs", "niveau", "annee", "sexe"}
 
 GROUPE_VALUES = {value for value, _ in User.GROUPE_CHOICES}
 
@@ -189,7 +189,7 @@ def ajouter_user(request):
         form = AjouterUserForm(request.POST)
         if form.is_valid():
             candidat = form.save(commit=False)
-            candidat.username = generer_username(candidat.first_name, candidat.last_name)
+            candidat.username = candidat.email
             if candidat.date_naissance:
                 candidat.set_password(mot_de_passe_initial(candidat.date_naissance))
             else:

@@ -37,6 +37,15 @@
             <th>Prénom</th>
             <th>Nom</th>
             <th>
+                {% if tri_actuel == "sexe" %}
+                    <a href="?tri=-sexe&q={{ q|urlencode }}">Sexe ▲</a>
+                {% elif tri_actuel == "-sexe" %}
+                    <a href="?tri=sexe&q={{ q|urlencode }}">Sexe ▼</a>
+                {% else %}
+                    <a href="?tri=sexe&q={{ q|urlencode }}">Sexe</a>
+                {% endif %}
+            </th>
+            <th>
                 {% if tri_actuel == "niveau" %}
                     <a href="?tri=-niveau&q={{ q|urlencode }}">Niveau ▲</a>
                 {% elif tri_actuel == "-niveau" %}
@@ -75,6 +84,7 @@
             <td>{{ u.username }}</td>
             <td>{{ u.first_name }}</td>
             <td>{{ u.last_name }}</td>
+            <td>{{ u.get_sexe_display }}</td>
             <td>{{ u.get_niveau_display }}</td>
             <td>{{ u.get_annee_display }}</td>
             <td>{{ u.nb_blocs }}</td>
