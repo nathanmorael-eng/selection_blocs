@@ -12,9 +12,17 @@
 <div class="toolbar">
     <form method="get" class="search-form">
         <input type="text" name="q" value="{{ q }}" placeholder="Rechercher (nom, email, identifiant)...">
+        <input type="hidden" name="sexe" value="{{ sexe_actuel }}">
+        <input type="hidden" name="tri" value="{{ tri_actuel }}">
         <button type="submit">Rechercher</button>
-        {% if q %}<a href="{% url 'liste_users' %}" class="btn">Effacer</a>{% endif %}
+        {% if q %}<a href="?tri={{ tri_actuel }}&sexe={{ sexe_actuel|urlencode }}" class="btn">Effacer</a>{% endif %}
     </form>
+    <div class="sexe-filter">
+        <a href="?tri={{ tri_actuel }}&q={{ q|urlencode }}&sexe=" class="btn{% if not sexe_actuel %} btn-actif{% endif %}">Tous</a>
+        {% for code, label in sexe_choices %}
+        <a href="?tri={{ tri_actuel }}&q={{ q|urlencode }}&sexe={{ code }}" class="btn{% if sexe_actuel == code %} btn-actif{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </div>
     <form method="post" action="{% url 'supprimer_tous_non_organisateurs' %}"
           onsubmit="return confirm('Supprimer TOUS les utilisateurs non-organisateurs ? Cette action est irréversible.');">
         {% csrf_token %}
@@ -27,49 +35,49 @@
         <tr>
             <th>
                 {% if tri_actuel == "username" %}
-                    <a href="?tri=-username&q={{ q|urlencode }}">Nom d'utilisateur ▲</a>
+                    <a href="?tri=-username&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Nom d'utilisateur ▲</a>
                 {% elif tri_actuel == "-username" %}
-                    <a href="?tri=username&q={{ q|urlencode }}">Nom d'utilisateur ▼</a>
+                    <a href="?tri=username&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Nom d'utilisateur ▼</a>
                 {% else %}
-                    <a href="?tri=username&q={{ q|urlencode }}">Nom d'utilisateur</a>
+                    <a href="?tri=username&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Nom d'utilisateur</a>
                 {% endif %}
             </th>
             <th>Prénom</th>
             <th>Nom</th>
             <th>
                 {% if tri_actuel == "sexe" %}
-                    <a href="?tri=-sexe&q={{ q|urlencode }}">Sexe ▲</a>
+                    <a href="?tri=-sexe&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Sexe ▲</a>
                 {% elif tri_actuel == "-sexe" %}
-                    <a href="?tri=sexe&q={{ q|urlencode }}">Sexe ▼</a>
+                    <a href="?tri=sexe&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Sexe ▼</a>
                 {% else %}
-                    <a href="?tri=sexe&q={{ q|urlencode }}">Sexe</a>
+                    <a href="?tri=sexe&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Sexe</a>
                 {% endif %}
             </th>
             <th>
                 {% if tri_actuel == "niveau" %}
-                    <a href="?tri=-niveau&q={{ q|urlencode }}">Niveau ▲</a>
+                    <a href="?tri=-niveau&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Niveau ▲</a>
                 {% elif tri_actuel == "-niveau" %}
-                    <a href="?tri=niveau&q={{ q|urlencode }}">Niveau ▼</a>
+                    <a href="?tri=niveau&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Niveau ▼</a>
                 {% else %}
-                    <a href="?tri=niveau&q={{ q|urlencode }}">Niveau</a>
+                    <a href="?tri=niveau&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Niveau</a>
                 {% endif %}
             </th>
             <th>
                 {% if tri_actuel == "annee" %}
-                    <a href="?tri=-annee&q={{ q|urlencode }}">Étude ▲</a>
+                    <a href="?tri=-annee&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Étude ▲</a>
                 {% elif tri_actuel == "-annee" %}
-                    <a href="?tri=annee&q={{ q|urlencode }}">Étude ▼</a>
+                    <a href="?tri=annee&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Étude ▼</a>
                 {% else %}
-                    <a href="?tri=annee&q={{ q|urlencode }}">Étude</a>
+                    <a href="?tri=annee&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Étude</a>
                 {% endif %}
             </th>
             <th>
                 {% if tri_actuel == "nb_blocs" %}
-                    <a href="?tri=-nb_blocs&q={{ q|urlencode }}">Blocs toppés ▲</a>
+                    <a href="?tri=-nb_blocs&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Blocs toppés ▲</a>
                 {% elif tri_actuel == "-nb_blocs" %}
-                    <a href="?tri=nb_blocs&q={{ q|urlencode }}">Blocs toppés ▼</a>
+                    <a href="?tri=nb_blocs&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Blocs toppés ▼</a>
                 {% else %}
-                    <a href="?tri=nb_blocs&q={{ q|urlencode }}">Blocs toppés</a>
+                    <a href="?tri=nb_blocs&q={{ q|urlencode }}&sexe={{ sexe_actuel|urlencode }}">Blocs toppés</a>
                 {% endif %}
             </th>
             <th>Dispo compét</th>

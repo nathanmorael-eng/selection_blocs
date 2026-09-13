@@ -14,12 +14,7 @@ from .vcards import generer_vcf
 # venue de l'URL pour construire un order_by() directement
 SORT_FIELDS = {"username", "nb_blocs", "niveau", "annee", "sexe"}
 
-# pour certains tris, on ajoute un critere secondaire (ex: a sexe egal, on
-# affiche d'abord ceux qui ont toppe le plus de blocs)
-SORT_SECONDAIRE = {
-    "sexe": ["sexe", "-nb_blocs"],
-    "-sexe": ["-sexe", "-nb_blocs"],
-}
+SEXE_VALUES = {value for value, _ in User.SEXE_CHOICES}
 
 GROUPE_VALUES = {value for value, _ in User.GROUPE_CHOICES}
 
@@ -67,12 +62,14 @@ def liste_users(request):
     if champ not in SORT_FIELDS:
         tri = "username"
     q = request.GET.get("q", "").strip()
+    sexe = request.GET.get("sexe", "")
+    if sexe not in SEXE_VALUES:
+        sexe = ""
 
     # une seule requete pour tout le monde, puis on repartit par groupe et on
     # filtre par recherche en memoire (meme principe que pour ids_toppes dans
     # liste_blocs : on evite de refaire une requete SQL par groupe/recherche)
-    ordre = SORT_SECONDAIRE.get(tri, [tri])
-    users = list(User.objects.annotate(nb_blocs=Count("ascents")).order_by(*ordre))
+    users = list(User.objects.annotate(nb_blocs=Count("ascents")).order_by(tri))
     # tri Python stable : garde l'ordre ci-dessus, mais fait passer les
     # personnes deja affectees a la fin de la liste
     users.sort(key=lambda u: bool(u.groupe))
@@ -82,22 +79,25 @@ def liste_users(request):
         if u.groupe in par_groupe:
             par_groupe[u.groupe].append(u)
 
+    users_affiches = users
+    if sexe:
+        users_affiches = [u for u in users_affiches if u.sexe == sexe]
     if q:
         q_lower = q.lower()
         users_affiches = [
-            u for u in users
+            u for u in users_affiches
             if q_lower in u.username.lower()
             or q_lower in u.first_name.lower()
             or q_lower in u.last_name.lower()
             or q_lower in u.email.lower()
         ]
-    else:
-        users_affiches = users
 
     return render(request, "liste_users.html", {
         "users": users_affiches,
         "tri_actuel": tri,
         "q": q,
+        "sexe_actuel": sexe,
+        "sexe_choices": User.SEXE_CHOICES,
         "affectes_compet": par_groupe["compet"],
         "affectes_perf": par_groupe["perf"],
         "affectes_refuse": par_groupe["refuse"],
